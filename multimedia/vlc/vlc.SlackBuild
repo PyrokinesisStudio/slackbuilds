@@ -28,7 +28,7 @@
 # -----------------------------------------------------------------------------
 
 PRGNAM=vlc
-VERSION=${VERSION:-20170523_bec643e}
+VERSION=${VERSION:-20171028_3767a33}
 BUILD=${BUILD:-1}
 TAG=${TAG:-_SBo}
 
@@ -120,6 +120,7 @@ cp extras/analyser/vlc.vim $PKG/$(cd /usr/share/vim/vim*/syntax ; pwd)/
 
 mkdir -p $PKG/usr/doc/$PRGNAM-$VERSION
 cp -a $DOCS $PKG/usr/doc/$PRGNAM-$VERSION
+mv $PKG/$PRGNAM.vim $PKG/usr/doc/$PRGNAM-$VERSION
 find $PKG/usr/doc -type f -exec chmod 644 {} \;
 chown -R root:root $PKG/usr/doc/$PRGNAM-$VERSION/*
 
