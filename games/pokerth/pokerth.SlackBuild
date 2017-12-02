@@ -77,6 +77,16 @@ find -L . \
 # Thanks ponce.
 sed -i "s|libircclient/||" src/net/common/ircthread.cpp
 
+# Fix for the newest boost
+patch -p1 < $CWD/std-ifstream-and-std-ofstream.patch
+
+# Fix building with gcc-6.x - thanks Archlinux folks!
+patch -p1 < $CWD/pokerth-gcc6.patch
+patch -p1 < $CWD/pokerth-c++11.patch
+
+# Another fix for boost - thanks to Gentoo
+patch -p1 < $CWD/pokerth-1.1.1-boost-1.65-ambiguous-advance.patch
+
 qmake pokerth.pro
 
 make #CFLAGS="$SLKCFLAGS" CXXFLAGS="$SLKCFLAGS"
