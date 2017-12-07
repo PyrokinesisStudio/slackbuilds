@@ -1,0 +1,378 @@
+Patch for mix-2.0.0 to build with changes in syntax of scons-3.0.0
+
+Matteo Bernardini <ponce@slackbuilds.org>
+
+diff -Naur mixxx-2.0.0.orig/plugins/soundsourcem4a/SConscript mixxx-2.0.0/plugins/soundsourcem4a/SConscript
+--- mixxx-2.0.0.orig/plugins/soundsourcem4a/SConscript	2015-12-29 17:10:41.000000000 +0100
++++ mixxx-2.0.0/plugins/soundsourcem4a/SConscript	2017-10-28 21:48:54.154313241 +0200
+@@ -47,7 +47,7 @@
+ 
+     if have_faad_26:
+         env.Append(CPPDEFINES = '__M4AHACK__')
+-        print "libfaad 2.6 compatibility mode... enabled"
++        print ("libfaad 2.6 compatibility mode... enabled")
+     if have_mp4v2_h:
+         env.Append(CPPDEFINES = '__MP4V2__')
+ 
+diff -Naur mixxx-2.0.0.orig/src/SConscript mixxx-2.0.0/src/SConscript
+--- mixxx-2.0.0.orig/src/SConscript	2015-12-29 17:10:41.000000000 +0100
++++ mixxx-2.0.0/src/SConscript	2017-10-28 22:11:00.133348147 +0200
+@@ -15,8 +15,8 @@
+ branch_name = util.get_branch_name()
+ vcs_revision = util.get_revision()
+ vcs_name = util.get_current_vcs()
+-print "WE ARE IN:", os.getcwd()
+-print "Building ", branch_name, " - rev.", vcs_revision
++print ("WE ARE IN:", os.getcwd())
++print ("Building ", branch_name, " - rev.", vcs_revision)
+ 
+ plugins = []
+ 
+@@ -114,15 +114,15 @@
+ def run_tests():
+         ret = Execute("./mixxx-test")
+         if ret != 0:
+-                print "WARNING: Not all tests pass. See mixxx-test output."
++                print ("WARNING: Not all tests pass. See mixxx-test output.")
+                 Exit(ret)
+ 
+ if int(build.flags['test']):
+-        print "Building tests."
++        print ("Building tests.")
+         build_tests()
+ 
+ if 'test' in BUILD_TARGETS:
+-        print "Running tests."
++        print ("Running tests.")
+         run_tests()
+ 
+ def construct_version(build, mixxx_version, branch_name, vcs_revision):
+@@ -284,7 +284,7 @@
+ if build.platform_is_linux or build.platform_is_bsd:
+         flags['prefix'] = ARGUMENTS.get('prefix', '/usr/local')
+         if not os.path.exists(flags['prefix']):
+-                print "Error: Prefix path does not exist!"
++                print ("Error: Prefix path does not exist!")
+                 Exit(1)
+         else:
+                 #install_root is used in Debian/Ubuntu packaging (check the debian/rules file in the Ubuntu package)
+@@ -292,7 +292,7 @@
+                 #building a Debian package, pbuilder wants to install Mixxx to a temporary directory, but you still need
+                 #the compiled-in strings using /usr as the prefix. That's why we have install_root and flags['prefix'].
+                 install_root = ARGUMENTS.get('install_root', flags['prefix'])
+-                print "Install root: " + install_root
++                print ("Install root: " + install_root)
+                 unix_share_path = os.path.join(install_root,
+                     env.get('SHAREDIR', default='share'))
+                 unix_bin_path = os.path.join(install_root,
+@@ -549,54 +549,46 @@
+     return program_location
+ 
+ def BuildRelease(target, source, env):
+-    print
+-    print "==== Mixxx Post-Build Checks ===="
+-    print
+-    print "You have built version %s" % mixxx_version
+-    print
++    print ("==== Mixxx Post-Build Checks ====")
++    print ("You have built version %s" % mixxx_version)
+     if build.build_is_debug:
+-        print "YOU ARE ABOUT TO PACKAGE A DEBUG BUILD!!"
+-        print
+-    print "Binary has size ",
++        print ("YOU ARE ABOUT TO PACKAGE A DEBUG BUILD!!")
++    print ("Binary has size ")
+     if build.platform_is_windows:
+         os.system('for %I in ('+dist_dir+'\mixxx.exe) do @echo %~zI')
+     else:
+         os.system('ls -lh '+dist_dir+'/mixxx.exe | cut -d \' \' -f 5')
+-    print
+-    print "Installer file ",
++    print ("Installer file ")
+     package_name = 'mixxx'
+ 
+     package_version = construct_version(build, mixxx_version, branch_name,
+                                         vcs_revision)
+     arch = "x64" if build.machine_is_64bit else "x86"
+     exe_name = '%s-%s-%s.exe' % (package_name, package_version, arch)
+-    print exe_name
+-    print
+-    print "Top line of README, check version:"
++    print (exe_name)
++    print ("Top line of README, check version:")
+     if build.platform_is_windows:
+         os.system('for /l %l in (1,1,1) do @for /f "tokens=1,2* delims=:" %a in (\'findstr /n /r "^" README ^| findstr /r "^%l:"\') do @echo %b')
+     else:
+         os.system('head -n 1 README')
+-    print
+-    print "Top 2 lines of LICENSE, check version and copyright dates:"
++    print ("Top 2 lines of LICENSE, check version and copyright dates:")
+     if build.platform_is_windows:
+         os.system('for /l %l in (1,1,2) do @for /f "tokens=1,2* delims=:" %a in (\'findstr /n /r "^" LICENSE ^| findstr /r "^%l:"\') do @echo %b')
+     else:
+         os.system('head -n 2 LICENSE')
+-    print
+     #if (raw_input("Go ahead and build installer (yes/[no])? ") == "yes"):
+     if True:
+         # TODO(XXX): Installing a runtime isn't specific to MSVS?
+         if build.toolchain_is_msvs:
+             redist_file = 'vcredist_%s.exe' % arch
+-            print "Searching for the Visual C++ DLL installer package", redist_file
++            print ("Searching for the Visual C++ DLL installer package", redist_file)
+             # Check for the runtime installer in the winlib root.
+             redist_path = '%s' % os.path.join(mixxx_winlib_path, redist_file)
+-            print "   ", redist_path,
++            print ("   ", redist_path)
+             if not os.path.isfile(redist_path):
+                 raise Exception('Could not find the MSVC++ runtime installer.')
+ 
+-        print "Now building installation package..."
++        print ("Now building installation package...")
+         command_flag = None
+         nsis_path = None
+         if not build.crosscompile and build.platform_is_windows:
+@@ -608,7 +600,7 @@
+             command_flag = '-'
+ 
+         if not nsis_path:
+-            print "Cannot find NSIS. Do you have it installed?"
++            print ("Cannot find NSIS. Do you have it installed?")
+         else:
+             # Call the NSIS build
+             buildwin64 = "/Dx64=1" if build.machine_is_64bit else ''
+@@ -619,10 +611,10 @@
+                  'qtpath': build.env['QTDIR'],
+                  'winlibpath': mixxx_winlib_path,
+                  '64bit': buildwin64}
+-            print "Using command: " + command
++            print ("Using command: " + command)
+             subprocess.check_call(command)
+     else:
+-        print "Aborted building installer"
++        print ("Aborted building installer")
+ 
+ # Do release things
+ versionbld = Builder(action = BuildRelease, suffix = '.foo', src_suffix = '.bar')
+@@ -661,31 +653,23 @@
+ # Build the Ubuntu package
+ def BuildUbuntuPackage(target, source, env):
+         global mixxx_version
+-        print
+-        print "==== Mixxx Post-Build Checks ===="
+-        print
+-        print "You have built version ", mixxx_version
+-        print
+-        print
+-        print "Top line of README, check version:"
++        print ("==== Mixxx Post-Build Checks ====")
++        print ("You have built version ", mixxx_version)
++        print ("Top line of README, check version:")
+         os.system('head -n 1 README')
+-        print
+-        print "Top 2 lines of LICENSE, check version and copyright dates:"
++        print ("Top 2 lines of LICENSE, check version and copyright dates:")
+         os.system('head -n 2 LICENSE')
+-        print
+-        print "Top line of debian/ubuntu changelog, check version:"
++        print ("Top line of debian/ubuntu changelog, check version:")
+         os.system('head -n 1 build/debian/changelog')
+-        print
+ 
+-        print "Now building DEB package..."
+-        print
++        print ("Now building DEB package...")
+ 
+         arch = 'amd64' if build.machine_is_64bit else 'i386'
+ 
+         package_target = ARGUMENTS.get('package', None)
+         ubuntu_distros = ARGUMENTS.get('ubuntu_dist', None)
+         if ubuntu_distros is None:
+-                print "You did not specify an Ubuntu distribution to target. Specify one with the ubuntu_dist flag."
++                print ("You did not specify an Ubuntu distribution to target. Specify one with the ubuntu_dist flag.")
+                 # TODO(XXX) default to their current distro? the .pbuilderrc does this
+                 return
+         ubuntu_version = ARGUMENTS.get('ubuntu_version', '0ubuntu1')
+@@ -717,23 +701,16 @@
+ 
+         build_dir = os.path.join('ubuntu', mixxx_dir)
+ 
+-        if os.path.exists(build_dir):
+-                print "* Cleaning up %s (cwd: %s)" % (build_dir, os.getcwd())
+-                print
+-                os.system('rm -rf %s' % build_dir) # be careful.
+-
+         # TODO: make a get flags arg to accept a revision which can override this and checkout of a specific SVN rev for the package
+ 
+         # Export the source folder
+-        print "* Exporting source folder from current workspace (%s rev: %s)" % (vcs_name,
+-                                                                                 vcs_revision)
+-        print
++        print ("* Exporting source folder from current workspace (%s rev: %s)" % (vcs_name,
++                                                                                 vcs_revision))
+         util.export_source('.', build_dir)
+ 
+         # Copy a patch to be included in the exported build sources (this can also be something like src/SConscript, /build/debian/rules)
+         if os.path.exists('post-export-patch'):
+-                print "* Applying post export patch"
+-                print
++                print ("* Applying post export patch")
+                 os.system('cp --dereference -r post-export-patch/* %s' % build_dir)
+ 
+         # Write a build.h to the exported directory. Later code looks for a
+@@ -744,15 +721,13 @@
+         os.chdir('ubuntu')
+ 
+         # Tar the source code
+-        print "* Tarring source directory to '%s' ... (this can take a couple minutes)" % os.path.join(os.getcwd(), mixxx_tarball)
+-        print
++        print ("* Tarring source directory to '%s' ... (this can take a couple minutes)" % os.path.join(os.getcwd(), mixxx_tarball))
+         os.system('rm -f "%s"' % mixxx_tarball) #Remove old tarball
+         os.system('tar --exclude build/debian --exclude=debian --exclude=debian/* -czf "%s" %s' % (mixxx_tarball, mixxx_dir))
+ 
+         os.chdir(mixxx_dir)
+         # Copy the debian folder from /build/debian to exported source folder root
+-        print "* Copying Debian build directory from build/debian to debian (cwd: %s)" % os.getcwd()
+-        print
++        print ("* Copying Debian build directory from build/debian to debian (cwd: %s)" % os.getcwd())
+         os.system('cp -r build/debian .')
+         os.system('cp res/linux/mixxx.usb.rules ./debian/mixxx.mixxx-usb.udev')
+ 
+@@ -790,8 +765,7 @@
+                                                 author="RJ Ryan <rryan@mixxx.org>")
+ 
+                 # Run pbuilder
+-                print "* Starting pbuilder ...  (cwd: %s)" % os.getcwd()
+-                print
++                print ("* Starting pbuilder ...  (cwd: %s)" % os.getcwd())
+ 
+                 command = ["MIXXX_BUILD=%s" % build.build,
+                            "ARCH=%s" % arch,
+@@ -809,11 +783,9 @@
+                 if package_target == 'source':
+                         if result == 0:
+                                 # TODO(rryan) check it actually succeeded
+-                                print "* Done! Signed source package is in ubuntu/"
+-                                print
++                                print ("* Done! Signed source package is in ubuntu/")
+                         else:
+-                                print "* Build failed."
+-                                print
++                                print ("* Build failed.")
+                 else:
+                         result_path = "/var/cache/pbuilder/%s-%s/result/" % (ubuntu_distro, arch)
+                         result_filename = "%s_%s_%s.deb" % (package_name, package_version, arch)
+@@ -843,27 +815,18 @@
+                                 shutil.move(source_tar_file, dest_tar_file)
+ 
+                         if result == 0 and os.path.exists(result_file):
+-                                print "Done! Package and tarballs are in %s" % result_path
+-                                print "* Found package at '%s'. Copying to ubuntu/" % result_file
+-                                print
++                                print ("Done! Package and tarballs are in %s" % result_path)
++                                print ("* Found package at '%s'. Copying to ubuntu/" % result_file)
+                                 shutil.copyfile(result_file, dest_deb_file)
+                         else:
+-                                print "* Build failed."
+-                                print
++                                print ("* Build failed.")
+ 
+                 # print "Signing the .deb changes file..."
+                 # os.system('sudo debsign /var/cache/pbuilder/result/*.changes')
+ 
+-                if ubuntu_ppa is not None:
+-                        # dput this changes file to the PPA
+-                        dput_command = 'dput %s ../%s_%s_source.changes' % (ubuntu_ppa, package_name, package_version)
+-                        print "* Uploading package for", ubuntu_distro, "to launchpad:", dput_command
+-                        os.system(dput_command)
+-
+         # Return back to the starting directory, otherwise you'll get a .sconsign.dblite error!
+         os.chdir('../..')
+-        print "* Returning to starting working directory ...  (cwd: " + os.getcwd() + ")"
+-        print
++        print ("* Returning to starting working directory ...  (cwd: " + os.getcwd() + ")")
+ 
+ #Build the Ubuntu package if "makeubuntu" was passed as an argument
+ versiondebbld = Builder(action = BuildUbuntuPackage) #, suffix = '.foo', src_suffix = '.bar')
+diff -Naur mixxx-2.0.0.orig/src/SConscript.env mixxx-2.0.0/src/SConscript.env
+--- mixxx-2.0.0.orig/src/SConscript.env	2015-12-29 17:10:41.000000000 +0100
++++ mixxx-2.0.0/src/SConscript.env	2017-10-28 21:37:47.023295680 +0200
+@@ -17,7 +17,7 @@
+ # Check for old build.h file and delete it if it exists
+ defs = str(SCons.Script.File('#src/build.h'))
+ if os.path.exists(defs):
+-    print "Deleting deprecated build file: %s" % defs
++    print ("Deleting deprecated build file: %s" % defs)
+     os.remove(defs)
+ 
+ #env.Append(CPPDEFINES=[('BUILD_REV', '"%s"' % getBZRRevision())]) #doing this forces a rebuild of everything whenever a commit happens -- not much fun
+@@ -61,7 +61,7 @@
+         dependency = dependency_class()
+ 
+         try:
+-                print "Configuring %s" % dependency.name
++                print ("Configuring %s" % dependency.name)
+                 dependency.configure(build, conf)
+         except Exception, e:
+                 logging.error("Unmet dependency: %s" % e)
+@@ -73,7 +73,7 @@
+ 
+ for feature in available_features:
+         try:
+-                print "Configuring %s" % feature.name
++                print ("Configuring %s" % feature.name)
+                 feature.configure(build, conf)
+ 
+                 # Only process the feature's dependencies if it's enabled
+@@ -106,7 +106,7 @@
+ #===================================================
+ 
+ # Print feature summary
+-print "\nFeatures Summary:\n================"
++print ("\nFeatures Summary:\n================")
+ 
+ for feature in available_features:
+         message = "Enabled" if feature.enabled(build) else "Disabled"
+@@ -115,7 +115,7 @@
+         if len(feature.status) > 0:
+                 message = "%s" % feature.status
+ 
+-        print "%035s... %s" % (feature.description(), message)
++        print ("%035s... %s" % (feature.description(), message))
+ 
+ build_flags = ' '.join(sorted(
+     [('%s=%s' % (k,v) if v is not None else k) for k,v in build.flags.iteritems() if v is not None]))
+@@ -163,20 +163,20 @@
+ 
+ # Print the build flags (useful if the flags have been cached, ie. if you just run "scons"
+ # and want to see the flags that you used last time)
+-print "================"
+-print "Building with flags: %s" % build_flags
+-print "Building with CC: %s" % env['CC']
+-print "Building with CXX: %s" % env['CXX']
+-print "Building with CCFLAGS: %s" % env['CCFLAGS']
+-print "Building with CPPDEFINES: %s" % ' '.join(['-D'+'='.join(pair) if not isinstance(pair, basestring) else '-D'+pair for pair in env['CPPDEFINES']])
+-print "Building with CXXFLAGS: %s" % env['CXXFLAGS']
+-print "Building with LINKFLAGS: %s" % env['LINKFLAGS']
+-print "Building with LIBS: %s" % ' '.join(env['LIBS'])
+-print "Building with PATH: %s" % env['ENV']['PATH']
++print ("================")
++print ("Building with flags: %s" % build_flags)
++print ("Building with CC: %s" % env['CC'])
++print ("Building with CXX: %s" % env['CXX'])
++print ("Building with CCFLAGS: %s" % env['CCFLAGS'])
++print ("Building with CPPDEFINES: %s" % ' '.join(['-D'+'='.join(pair) if not isinstance(pair, basestring) else '-D'+pair for pair in env['CPPDEFINES']]))
++print ("Building with CXXFLAGS: %s" % env['CXXFLAGS'])
++print ("Building with LINKFLAGS: %s" % env['LINKFLAGS'])
++print ("Building with LIBS: %s" % ' '.join(env['LIBS']))
++print ("Building with PATH: %s" % env['ENV']['PATH'])
+ if build.platform_is_windows:
+-    print "Building with INCLUDE: %s" % env['ENV']['INCLUDE']
+-    print "Building with LIB: %s" % env['ENV']['LIB']
+-    print "Building with LIBPATH: %s" % env['ENV']['LIBPATH']
+-print "================\n"
++    print ("Building with INCLUDE: %s" % env['ENV']['INCLUDE'])
++    print ("Building with LIB: %s" % env['ENV']['LIB'])
++    print ("Building with LIBPATH: %s" % env['ENV']['LIBPATH'])
++print ("================\n")
+ 
+ Export('sources')
