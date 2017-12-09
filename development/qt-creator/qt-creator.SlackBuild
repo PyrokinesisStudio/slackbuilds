@@ -116,6 +116,9 @@ sed -i "s|share/doc/qtcreator|doc/$PRGNAM-$VERSION|g" qtcreator.pri
 sed -i "s|share/doc/qtcreator|doc/$PRGNAM-$VERSION|g" doc/api/qtcreator-documentation.qdoc
 sed -i "s|share/doc/qtcreator|doc/$PRGNAM-$VERSION|g" src/plugins/coreplugin/icore.cpp
 
+# Allow g++ to find <stdlib.h>
+echo 'QMAKE_CFLAGS_ISYSTEM=' >> ./src/plugins/qbsprojectmanager/qbsprojectmanager.pro
+
 qmake-qt5 qtcreator.pro \
   QMAKE_CXXFLAGS="$SLKCFLAGS" \
   DEFINES+=QBS_ENABLE_PROJECT_FILE_UPDATES \
