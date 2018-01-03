@@ -28,7 +28,7 @@
 # see nvidia-driver/changelog.txt
 
 PRGNAM=nvidia-kernel
-VERSION=${VERSION:-384.90}
+VERSION=${VERSION:-384.98}
 BUILD=${BUILD:-1}
 TAG=${TAG:-_SBo}
 
@@ -78,6 +78,8 @@ find -L . \
   -o -perm 511 \) -exec chmod 755 {} \; -o \
  \( -perm 666 -o -perm 664 -o -perm 640 -o -perm 600 -o -perm 444 \
   -o -perm 440 -o -perm 400 \) -exec chmod 644 {} \;
+
+patch -p1 < $CWD/kernel-4.14.9.patch
 
 (cd kernel || exit 1
   make SYSSRC=$KERNELPATH module || exit 1
