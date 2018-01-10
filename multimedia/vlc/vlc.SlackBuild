@@ -28,8 +28,8 @@
 # -----------------------------------------------------------------------------
 
 PRGNAM=vlc
-VERSION=${VERSION:-20170523_bec643e}
-BUILD=${BUILD:-2}
+VERSION=${VERSION:-20180109_0c462fc} # https://git.videolan.org/git/vlc/vlc-3.0.git
+BUILD=${BUILD:-1}
 TAG=${TAG:-_SBo}
 
 if [ -z "$ARCH" ]; then
@@ -82,7 +82,6 @@ cd $PRGNAM-$VERSION
 
 patch -p0 < $CWD/patch-projectM-fontpath.diff
 patch -p0 < $CWD/patch_vlc_cache_gen.diff
-patch -p1 < $CWD/patch-libupnp.diff
 
 autoreconf -fiv
 
@@ -107,7 +106,6 @@ LDFLAGS="$SLKLDFLAGS" \
   $qtversion \
   $wayland \
   --enable-merge-ffmpeg \
-  --enable-libva=no \
   --with-kde-solid=no \
 
 make
@@ -121,6 +119,7 @@ cp extras/analyser/vlc.vim $PKG/$(cd /usr/share/vim/vim*/syntax ; pwd)/
 
 mkdir -p $PKG/usr/doc/$PRGNAM-$VERSION
 cp -a $DOCS $PKG/usr/doc/$PRGNAM-$VERSION
+mv $PKG/$PRGNAM.vim $PKG/usr/doc/$PRGNAM-$VERSION
 find $PKG/usr/doc -type f -exec chmod 644 {} \;
 chown -R root:root $PKG/usr/doc/$PRGNAM-$VERSION/*
 
