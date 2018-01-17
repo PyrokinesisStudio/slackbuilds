@@ -53,7 +53,7 @@
 # 4.3	06-JAN-2018	verions update to 2.10.x release
 
 PRGNAM=qemu
-VERSION=${VERSION:-2.10.2}
+VERSION=${VERSION:-2.11.0}
 BUILD=${BUILD:-1}
 TAG=${TAG:-_SBo}
 
