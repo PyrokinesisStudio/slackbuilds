@@ -89,6 +89,7 @@ autoreconf -vif
   --disable-static \
   --disable-dependency-tracking \
   --build=$ARCH-slackware-linux \
+  --disable-doxygen \
   CFLAGS="$SLKCFLAGS" \
   CXXFLAGS="$SLKCFLAGS" \
 
