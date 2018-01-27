@@ -78,7 +78,7 @@ find -L . \
 rm -f src/include/OpenImageIO/pugi*
 
 # save this for GCC 7.0
-#sed -i "s|std=c++11|std=c++11 -Wno-error=maybe-uninitialized -Wno-error=format-truncation -Wno-error=noexcept-type -faligned-new|" CMakeLists.txt
+sed -i "s|std=c++11|std=c++11 -Wno-error=maybe-uninitialized -Wno-error=format-truncation -Wno-error=noexcept-type -faligned-new|" CMakeLists.txt
 
 mkdir -p build
 cd build
